@@ -189,12 +189,14 @@ See `native-complete-style-suffix-alist'."
          ;; append a space. We need to seperate this candidate from the "y"
          ;; character so it will be consumed properly.
          (continued-cmd
-          (rx-to-string `(: bos (group ,native-complete--command (+ graph)) "y" (in ""))))
+          (rx-to-string `(: bos (group ,native-complete--command (+ graph)) "y" (in "
+"))))
          ;; the current command may be echoed multiple times in the output. We
          ;; only want to leave it when it ends with a space since that means it
          ;; is the sole completion
          (echo-cmd
-          (rx-to-string `(: bol ,native-complete--command (* graph) (in ""))))
+          (rx-to-string `(: bol ,native-complete--command (* graph) (in "
+"))))
          ;; Remove the "display all possibilities" query so that it does not get
          ;; picked up as a completion.
          (query-text (rx bol (1+ nonl) "? "
@@ -206,7 +208,9 @@ See `native-complete-style-suffix-alist'."
                      (goto-char (match-end 1))
                      (insert " "))
                    (buffer-string))))
-    (thread-last (split-string buffer "\n\n")
+    (thread-last (split-string buffer "\n
+
+\n")
       (car)
       (ansi-color-filter-apply)
       (replace-regexp-in-string echo-cmd "")
@@ -270,7 +274,7 @@ emulator."
     (when (eq 'bash completion-style)
       (when (equal comint-terminfo-terminal "dumb")
         (user-error "error: `native-complete-setup-bash' not called. Bash is not setup")))
-    (if (featurep 'company)
+    (if (bound-and-true-p company-mode)
         (unless (native-complete-tree-assoc 'company-native-complete company-backends)
           (user-error "error: `company-native-complete' not one of `company-backends'"))
       (unless (native-complete-tree-assoc 'native-complete-at-point completion-at-point-functions)
